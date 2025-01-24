@@ -290,7 +290,7 @@ func (client *Client) GetQueryResults(ctx context.Context, id int, ext string, o
 		return errors.New("out(io.Writer) is nil")
 	}
 
-	res, close, err := client.Get(ctx, fmt.Sprintf("api/queries/%d/results.%s", id, ext), nil)
+	res, close, err := client.Get(ctx, fmt.Sprintf("api/query_results/%d.%s", id, ext), nil)
 	defer close()
 
 	if err != nil {
@@ -305,12 +305,14 @@ func (client *Client) GetQueryResults(ctx context.Context, id int, ext string, o
 type ExecQueryJSONInput struct {
 	Parameters            map[string]any `json:"parameters,omitempty"`
 	MaxAge                int            `json:"max_age,omitempty"`
+	ApplyAutoLimit        bool           `json:"apply_auto_limit"`
 	WithoutOmittingMaxAge bool           `json:"-"`
 }
 
 type execQueryJSONInputWithMaxAge struct {
-	Parameters map[string]any `json:"parameters,omitempty"`
-	MaxAge     int            `json:"max_age"`
+	Parameters     map[string]any `json:"parameters,omitempty"`
+	MaxAge         int            `json:"max_age"`
+	ApplyAutoLimit bool           `json:"apply_auto_limit"`
 }
 
 func (client *Client) ExecQueryJSON(ctx context.Context, id int, input *ExecQueryJSONInput, out io.Writer) (*JobResponse, error) {
@@ -322,8 +324,9 @@ func (client *Client) ExecQueryJSON(ctx context.Context, id int, input *ExecQuer
 
 	if input != nil && input.WithoutOmittingMaxAge {
 		body = &execQueryJSONInputWithMaxAge{
-			Parameters: input.Parameters,
-			MaxAge:     input.MaxAge,
+			Parameters:     input.Parameters,
+			MaxAge:         input.MaxAge,
+			ApplyAutoLimit: input.ApplyAutoLimit,
 		}
 	}
 
@@ -455,6 +458,7 @@ func (client *Client) GetQueryTags(ctx context.Context) (*QueryTags, error) {
 }
 
 type RefreshQueryInput struct {
+	ID             int                    `json:"id"`
 	Parameters     map[string]interface{} `json:"parameters,omitempty"`
 	ApplyAutoLimit bool                   `json:"apply_auto_limit"`
 	MaxAge         int                    `json:"max_age"`
