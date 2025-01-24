@@ -1894,7 +1894,7 @@ func Test_RefreshQuery_OK(t *testing.T) {
 	})
 
 	client, _ := redash.NewClient("https://redash.example.com", testRedashAPIKey)
-	job, err := client.RefreshQuery(context.Background(), 1)
+	job, err := client.RefreshQuery(context.Background(), 1, nil)
 	assert.NoError(err)
 	assert.Equal(&redash.JobResponse{
 		Job: redash.Job{
@@ -1917,7 +1917,7 @@ func Test_RefreshQuery_Err_5xx(t *testing.T) {
 	})
 
 	client, _ := redash.NewClient("https://redash.example.com", testRedashAPIKey)
-	_, err := client.RefreshQuery(context.Background(), 1)
+	_, err := client.RefreshQuery(context.Background(), 1, nil)
 	assert.ErrorContains(err, "POST api/queries/1/refresh failed: HTTP status code not OK: 503\nerror")
 }
 
@@ -1931,7 +1931,7 @@ func Test_RefreshQuery_IOErr(t *testing.T) {
 	})
 
 	client, _ := redash.NewClient("https://redash.example.com", testRedashAPIKey)
-	_, err := client.RefreshQuery(context.Background(), 1)
+	_, err := client.RefreshQuery(context.Background(), 1, nil)
 	assert.ErrorContains(err, "Read response body failed: IO error")
 }
 
@@ -2681,7 +2681,7 @@ func Test_Query_Acc(t *testing.T) {
 	require.NoError(err)
 	assert.Equal("?column?\r\n1\r\n", buf.String())
 
-	job, err = client.RefreshQuery(context.Background(), query.ID)
+	job, err = client.RefreshQuery(context.Background(), query.ID, nil)
 	require.NoError(err)
 
 	if job != nil && job.Job.ID != "" {

@@ -454,8 +454,14 @@ func (client *Client) GetQueryTags(ctx context.Context) (*QueryTags, error) {
 	return tags, nil
 }
 
-func (client *Client) RefreshQuery(ctx context.Context, id int) (*JobResponse, error) {
-	res, close, err := client.Post(ctx, fmt.Sprintf("api/queries/%d/refresh", id), nil)
+type RefreshQueryInput struct {
+	Parameters     map[string]interface{} `json:"parameters,omitempty"`
+	ApplyAutoLimit bool                   `json:"apply_auto_limit"`
+	MaxAge         int                    `json:"max_age"`
+}
+
+func (client *Client) RefreshQuery(ctx context.Context, id int, input *RefreshQueryInput) (*JobResponse, error) {
+	res, close, err := client.Post(ctx, fmt.Sprintf("api/queries/%d/refresh", id), input)
 	defer close()
 
 	if err != nil {
